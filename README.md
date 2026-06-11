@@ -9,20 +9,18 @@ Built for users who want to use phone's input method (with voice input ) on Linu
 - Use input method of phone
 - Supports Chinese and other Unicode text
 - Works through a local web page
-- Uses `wtype` for Wayland text injection
+- Uses `wtype or crossmacro` for Wayland to paste text
 - No Bluetooth required
 
 ## Requirements
 
 - Linux Wayland session
-- `wtype`
-- Python 3
 - Phone and computer on the same LAN
 
 On Arch Linux:
 
 ```bash
-sudo pacman -S wtype python
+yay -S wtype crossmarco
 ```
 
 ## Usage
@@ -51,4 +49,30 @@ Put your cursor in any input field on your computer, type or use voice input on 
 ## Tested on
 Arch Linux Niri
 Android
+wechat
+qq
+firefox
+edge
+chrome
+vscode
+kitty
+
+## Compatibility Notes
+
+### Direct keyboard simulation
+
+Direct text injection through `wtype text` is not reliable across all Wayland applications.
+
+Observed issues include:
+
+- Some browsers may drop the first CJK character.
+- WeChat and QQ may interpret injected text as numbers incorrectly.
+
+For this reason, Phone IME Bridge uses clipboard-based paste by default.
+
+And `wtype` may cause the window to exit unexpectedly.
+
+WeChat and QQ require a different paste backend `crossmacro` for reliable operation.
+
+Phone IME Bridge automatically detects these applications and switches to a compatible paste method.
 
