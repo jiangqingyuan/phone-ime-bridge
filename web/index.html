@@ -6,44 +6,115 @@
   <title>Phone IME Bridge</title>
   <style>
     body {
+      margin: 0;
+      padding: 16px;
       font-family: sans-serif;
-      max-width: 720px;
-      margin: auto;
-      padding: 20px;
-      font-size: 20px;
+      background: #111;
+      color: #eee;
     }
 
     textarea {
-      box-sizing: border-box;
       width: 100%;
-      height: 180px;
+      height: 45vh;
+      box-sizing: border-box;
       font-size: 24px;
+      line-height: 1.5;
       padding: 12px;
+      border-radius: 12px;
+    }
+
+    .status {
+      margin-top: 12px;
+      opacity: 0.75;
+      font-size: 14px;
     }
 
     button {
-      width: 100%;
-      font-size: 26px;
-      padding: 14px;
       margin-top: 12px;
-    }
-
-    .hint {
-      color: #666;
-      font-size: 16px;
+      width: 100%;
+      font-size: 20px;
+      padding: 12px;
+      border-radius: 12px;
     }
   </style>
 </head>
 <body>
-  <h2>Phone IME Bridge</h2>
+  <textarea id="text" autofocus placeholder="输入中文，上屏后自动发送"></textarea>
 
-  <form method="POST">
-    <textarea name="text" autofocus placeholder="可用手机输入法的语音输入"></textarea>
-    <button type="submit">发送到电脑</button>
-  </form>
+  <button id="send">手动发送</button>
 
-  <p class="hint">
-    把电脑光标放到目标输入框，然后在这里输入文字并发送。
-  </p>
+  <div class="status" id="status">等待输入</div>
+
+  <script>
+    const textarea = document.getElementById("text");
+    const button = document.getElementById("send");
+    const statusEl = document.getElementById("status");
+
+    let composing = false;
+    let sending = false;
+
+    function setStatus(text) {
+      statusEl.textContent = text;
+    }
+
+    async function sendCurrentText() {
+      const text = textarea.value;
+
+      if (text.length==0) {
+        return;
+      }
+
+      if (sending) {
+        return;
+      }
+
+      sending = true;
+      textarea.value = "";
+      setStatus("发送中...");
+
+      try {
+        await fetch("/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+          },
+          body: new URLSearchParams({ text }),
+        });
+
+        setStatus("已发送：" + text);
+      } catch (err) {
+        setStatus("发送失败");
+        textarea.value = text;
+      } finally {
+        sending = false;
+        textarea.focus();
+      }
+    }
+
+    textarea.addEventListener("compositionstart", () => {
+      composing = true;
+    });
+
+    textarea.addEventListener("compositionend", () => {
+      composing = false;
+      sendCurrentText();
+    });
+
+    textarea.addEventListener("keydown", (event) => {
+  // Ctrl + Enter 发送
+     if (event.key === "Enter" && event.ctrlKey) {
+      event.preventDefault();
+      sendCurrentText();
+    }
+
+  // 普通 Enter 保留为换行
+    });
+
+    button.addEventListener("click", () => {
+      sendCurrentText();
+    });
+
+    textarea.focus();
+  </script>
 </body>
 </html>

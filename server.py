@@ -44,6 +44,21 @@ def detect_mode():
     ):
         return "im"
 
+    if any(x in app_id for x in ["firefox", "chromium", "chrome", "brave", "edge", "zen"]):
+        return "browser"
+
+    if any(x in app_id for x in [
+        "foot",
+        "kitty",
+        "ghostty",
+        "alacritty",
+        "wezterm",
+        "terminator",
+        "xfce4-terminal",
+        "konsole",
+        "gnome-terminal",
+    ]):
+        return "terminal"
     return "normal"
 
 
@@ -87,15 +102,21 @@ def send_by_clipboard(text: str, paste_func):
     paste_func()
     set_clipboard(old)
 
+def send_by_wtype(text: str):
+    subprocess.run(
+        ["wtype", text],
+        check=False,
+    )
 
 def send_text(text: str):
     mode = detect_mode()
 
-    if mode == "im":
+    if mode == "terminal":
+        send_by_wtype(text)
+    elif mode == "im":
         send_by_clipboard(text, paste_with_crossmacro)
     else:
         send_by_clipboard(text, paste_with_wtype)
-
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -112,7 +133,7 @@ class Handler(BaseHTTPRequestHandler):
 
         text = parse_qs(body).get("text", [""])[0]
 
-        if text:
+        if text!="":
             send_text(text)
 
         self.send_response(303)

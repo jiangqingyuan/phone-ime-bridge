@@ -57,6 +57,22 @@ chrome
 vscode
 kitty
 
+## Input Behavior
+
+### Supported
+
+- Chinese text
+- English text
+- Spaces
+- Multiple spaces
+- Newlines
+
+### Sending Rules
+
+- Voice recognition completion → automatic send
+- Enter → newline
+- Ctrl+Enter → manual send
+
 ## Compatibility Notes
 
 ### Direct keyboard simulation
@@ -67,12 +83,11 @@ Observed issues include:
 
 - Some browsers may drop the first CJK character.
 - WeChat and QQ may interpret injected text as numbers incorrectly.
+- Using `wtype` to paste may cause the window of wechat and qq to exit unexpectedly.
 
-For this reason, Phone IME Bridge uses clipboard-based paste by default.
+For this reason, Phone IME Bridge uses clipboard-based paste by default 
 
-And `wtype` may cause the window to exit unexpectedly.
+and WeChat and QQ require a different paste backend `crossmacro` for reliable operation.
 
-WeChat and QQ require a different paste backend `crossmacro` for reliable operation.
-
-Phone IME Bridge automatically detects these applications and switches to a compatible paste method.
+Phone IME Bridge automatically detects these applications and switches to a compatible input method.
 
